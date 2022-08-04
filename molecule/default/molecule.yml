@@ -4,13 +4,36 @@ dependency:
 driver:
   name: docker
 platforms:
-  - name: centos8
-    image: quay.io/centos/centos:stream8
+  - name: elastic_ubuntu
+    image: docker.io/pycontribs/ubuntu:latest
     pre_build_image: true
-  - name: centos7
+    privileged: True
+    groups:
+      - elasticsearch
+    networks:
+      - name: elk
+  - name: kibana_centos7
     image: docker.io/pycontribs/centos:7
     pre_build_image: true
+    command: /sbin/init
+    privileged: True
+    networks:
+      - name: elk
+    groups:
+      - kibana
+  - name: kibana_ubuntu
+    image: docker.io/pycontribs/ubuntu:latest
+    pre_build_image: true
+    privileged: True
+    networks:
+      - name: elk
+    groups:
+      - kibana
 provisioner:
   name: ansible
+  inventory:
+    group_vars:
+      kibana:
+        default_elastic_host: elastic_ubuntu
 verifier:
   name: ansible

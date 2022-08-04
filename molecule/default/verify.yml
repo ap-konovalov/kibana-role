@@ -2,10 +2,16 @@
 # This is an example playbook to execute Ansible tests.
 
 - name: Verify
-  hosts: all
+  hosts: kibana
   gather_facts: false
   tasks:
-  - name: Check Kibana version
-    shell:
-      cmd: /opt/kibana/8.3.3/bin/kibana --version
-    changed_when: false
+  - name: Request to kibana
+    command:
+      cmd: curl http://localhost:5601/api/status
+    register: result
+  - name: Set a variable
+    ansible.builtin.set_fact:
+      response: "{{ result.stdout | from_json }}"
+  - name: Version verify
+    assert:
+      that: response.version.number == "8.3.3"
